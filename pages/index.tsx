@@ -1,86 +1,154 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
+/** @format */
+
+import clsx from "clsx";
+import type { NextPage } from "next";
+import Head from "next/head";
+import { AiFillDelete } from "react-icons/ai";
+import { useState, useRef, useEffect } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+
+interface TodoType {
+  id?: string | number;
+  task?: string | undefined;
+  done?: boolean;
+}
 
 const Home: NextPage = () => {
+  const [animationParent] = useAutoAnimate();
+
+  const templateTodo: TodoType[] = [
+    {
+      id: 1,
+      task: "This is task list app",
+      done: false
+    },
+    {
+      id: 2,
+      task: "This is 2 todo",
+      done: true
+    }
+  ];
+
+  const [todo, setTodo] = useState(templateTodo);
+  const [enterTodo, setEnterTodo] = useState("");
+
+  function addTodo(e: React.SyntheticEvent) {
+    e.preventDefault();
+    // if (enterTodo != "" && !todo[].includes(enterTodo))
+    if (enterTodo != "" && !todo.find((d) => d.task === enterTodo))
+      setTodo([
+        ...todo,
+        {
+          id: crypto.randomUUID(),
+          task: enterTodo,
+          done: false
+        }
+      ]);
+    setEnterTodo("");
+  }
+
+  function removeTodo(todoID: string) {
+    const filterTdo = todo.filter((d) => d.task != todoID);
+    setTodo([...filterTdo]);
+  }
+
+  function handleToggleTask(todoID: string) {
+    console.log("task-", todoID);
+
+    const updatedTodos = todo.map((task) => {
+      if (task.task === todoID) {
+        return { ...task, done: !task.done };
+      }
+      return task;
+    });
+
+    setTodo(updatedTodos);
+  }
+
+  console.log("todo-", todo);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+    <div className="flex min-h-screen   justify-center pt-4 pb-2 px-4">
       <Head>
         <title>Create Next App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
-        <h1 className="text-6xl font-bold">
-          Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
-            Next.js!
-          </a>
-        </h1>
-
-        <p className="mt-3 text-2xl">
-          Get started by editing{' '}
-          <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            pages/index.tsx
-          </code>
-        </p>
-
-        <div className="mt-6 flex max-w-4xl flex-wrap items-center justify-around sm:w-full">
-          <a
-            href="https://nextjs.org/docs"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
+      <main className=" max-w-[600px] w-full    p-1">
+        <form className="mb-4 flex gap-2" action="">
+          <input
+            className="border-[1px] px-2 rounded h-11 w-full border-gray-300 outline-gray-600  "
+            type="text"
+            placeholder="Enter To Do"
+            autoComplete="on"
+            autoCorrect="on"
+            value={enterTodo}
+            onChange={(e) => setEnterTodo(e.target.value)}
+          />
+          <button
+            className="bg-green-400 whitespace-nowrap text-white px-4 rounded
+            active:bg-opacity-90"
+            onClick={addTodo}
+            type="submit"
           >
-            <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Find in-depth information about Next.js features and its API.
-            </p>
-          </a>
+            Add todo
+          </button>
+        </form>
 
-          <a
-            href="https://nextjs.org/learn"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Learn &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Learn about Next.js in an interactive course with quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Examples &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Discover and deploy boilerplate example Next.js projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="mt-6 w-96 rounded-xl border p-6 text-left hover:text-blue-600 focus:text-blue-600"
-          >
-            <h3 className="text-2xl font-bold">Deploy &rarr;</h3>
-            <p className="mt-4 text-xl">
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        {/*  */}
+        <section ref={animationParent} className="flex gap-1 flex-col ">
+          <Todo
+            {...{ handleToggleTask, removeTodo }}
+            todos={todo.filter((todo) => todo.done == false)}
+          />
+          {/*  */}
+          {!(
+            todo.length < 0 ||
+            todo.filter((todo) => todo.done == false).length == 0 ||
+            todo.filter((todo) => todo.done == true).length == 0
+          ) && (
+            <div className="w-[95%]  mx-auto h-[.5px] rounded-full bg-gray-200" />
+          )}
+          <Todo
+            {...{ handleToggleTask, removeTodo }}
+            todos={todo.filter((todo) => todo.done == true)}
+          />
+        </section>
       </main>
-
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
     </div>
-  )
+  );
+};
+
+export default Home;
+
+interface Todo {
+  handleToggleTask: Function;
+  removeTodo: Function;
+  todos: TodoType[];
 }
 
-export default Home
+function Todo({ handleToggleTask, removeTodo, todos }: Todo) {
+  return (
+    <>
+      {todos.map((data, i) => (
+        <section className="flex justify-between gap-4 py-2">
+          <button
+            onClick={() => handleToggleTask(data.task)}
+            className="flex gap-1 rounded  items-start border px-2 "
+          >
+            <input type="checkbox" checked={data.done} className="mt-1.5 " />
+            <label
+              className={clsx("cursor-pointer", {
+                " line-through ": data.done
+              })}
+            >
+              {data.task}
+            </label>
+          </button>
+          <button onClick={() => removeTodo(data.task)} className="">
+            <AiFillDelete className="text-red-400 text-2xl" />
+          </button>
+        </section>
+      ))}
+    </>
+  );
+}
