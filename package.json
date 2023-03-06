@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@formkit/auto-animate": "^1.0.0-beta.6",
+    "@preact/signals-react": "^1.2.2",
     "clsx": "^1.2.1",
     "next": "latest",
     "react": "18.2.0",

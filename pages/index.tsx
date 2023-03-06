@@ -6,6 +6,7 @@ import Head from "next/head";
 import { AiFillDelete } from "react-icons/ai";
 import { useState, useRef, useEffect } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useSignal, useComputed } from "@preact/signals-react";
 
 interface TodoType {
   id?: string | number;
@@ -19,50 +20,52 @@ const Home: NextPage = () => {
   const templateTodo: TodoType[] = [
     {
       id: 1,
-      task: "This is task list app",
+      task: "Todo 1",
       done: false
     },
     {
       id: 2,
-      task: "This is 2 todo",
+      task: "Todo 2",
       done: true
     }
   ];
 
-  const [todo, setTodo] = useState(templateTodo);
+  
+  const todo = useSignal(templateTodo);
+  // const [todo, setTodo] = useState(templateTodo);
   const [enterTodo, setEnterTodo] = useState("");
 
   function addTodo(e: React.SyntheticEvent) {
     e.preventDefault();
     // if (enterTodo != "" && !todo[].includes(enterTodo))
-    if (enterTodo != "" && !todo.find((d) => d.task === enterTodo))
-      setTodo([
-        ...todo,
+    if (enterTodo != "" && !todo.value.find((d) => d.task === enterTodo))
+      todo.value = [
+        ...todo.value,
         {
           id: crypto.randomUUID(),
           task: enterTodo,
           done: false
         }
-      ]);
+      ];
     setEnterTodo("");
   }
 
   function removeTodo(todoID: string) {
-    const filterTdo = todo.filter((d) => d.task != todoID);
-    setTodo([...filterTdo]);
+    const filterTdo = todo.value.filter((d) => d.task != todoID);
+    todo.value = [...filterTdo];
   }
 
   function handleToggleTask(todoID: string) {
     console.log("task-", todoID);
 
-    const updatedTodos = todo.map((task) => {
+    const updatedTodos = todo.value.map((task) => {
       if (task.task === todoID) {
         return { ...task, done: !task.done };
       }
       return task;
     });
 
-    setTodo(updatedTodos);
+    todo.value = updatedTodos;
   }
 
   console.log("todo-", todo);
@@ -98,19 +101,19 @@ const Home: NextPage = () => {
         <section ref={animationParent} className="flex gap-1 flex-col ">
           <Todo
             {...{ handleToggleTask, removeTodo }}
-            todos={todo.filter((todo) => todo.done == false)}
+            todos={todo.value.filter((todo) => todo.done == false)}
           />
           {/*  */}
           {!(
-            todo.length < 0 ||
-            todo.filter((todo) => todo.done == false).length == 0 ||
-            todo.filter((todo) => todo.done == true).length == 0
+            todo.value.length < 0 ||
+            todo.value.filter((todo) => todo.done == false).length == 0 ||
+            todo.value.filter((todo) => todo.done == true).length == 0
           ) && (
             <div className="w-[95%]  mx-auto h-[.5px] rounded-full bg-gray-200" />
           )}
           <Todo
             {...{ handleToggleTask, removeTodo }}
-            todos={todo.filter((todo) => todo.done == true)}
+            todos={todo.value.filter((todo) => todo.done == true)}
           />
         </section>
       </main>
