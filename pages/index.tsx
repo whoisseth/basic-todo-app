@@ -15,8 +15,6 @@ interface TodoType {
 }
 
 const Home: NextPage = () => {
-  const [animationParent] = useAutoAnimate();
-
   const templateTodo: TodoType[] = [
     {
       id: 1,
@@ -29,10 +27,18 @@ const Home: NextPage = () => {
       done: true
     }
   ];
-
-  
+  const [animationParent] = useAutoAnimate();
   const todo = useSignal(templateTodo);
-  // const [todo, setTodo] = useState(templateTodo);
+
+  useEffect(() => {
+    const value = window.localStorage.getItem("todo");
+    todo.value = value ? JSON.parse(value) : templateTodo;
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("todo", JSON.stringify(todo.value));
+  }, [todo.value]);
+
   const [enterTodo, setEnterTodo] = useState("");
 
   function addTodo(e: React.SyntheticEvent) {
